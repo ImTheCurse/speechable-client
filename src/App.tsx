@@ -1,6 +1,6 @@
 import { createContext, useState } from "react";
 import "./App.css";
-import Layout from "./comp/layout";
+import Layout from "./comp/layout/layout";
 
 const getTheme = () => {
   const theme = localStorage.getItem("theme");
@@ -23,7 +23,7 @@ function App() {
   document.body.style.backgroundColor = theme === "dark" ? "" : "white";
   return (
     <ThemeContext.Provider value={theme}>
-      <Layout />
+      <Layout themeToggle={toggleTheme} />
     </ThemeContext.Provider>
   );
 }
