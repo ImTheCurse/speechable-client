@@ -1,6 +1,8 @@
 import { createContext, useState } from "react";
 import "./App.css";
+import Library from "./pages/library";
 import Layout from "./comp/layout/layout";
+import { Route, Routes } from "react-router-dom";
 
 const getTheme = () => {
   const theme = localStorage.getItem("theme");
@@ -23,7 +25,12 @@ function App() {
   document.body.style.backgroundColor = theme === "dark" ? "" : "white";
   return (
     <ThemeContext.Provider value={theme}>
-      <Layout themeToggle={toggleTheme} />
+      <Routes>
+        <Route path="/" element={<Layout themeToggle={toggleTheme} />}>
+          <Route path="library" element={<Library />} />
+          <Route path="marketplace" element={<h1>Marketplace</h1>} />
+        </Route>
+      </Routes>
     </ThemeContext.Provider>
   );
 }
