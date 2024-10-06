@@ -1,3 +1,9 @@
+import LibraryCard from "../comp/cards/libraryCard";
+
 export default function Library() {
-  return <h1>hello world!</h1>;
+  return (
+    <>
+      <LibraryCard />;
+    </>
+  );
 }
