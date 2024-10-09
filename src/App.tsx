@@ -3,6 +3,8 @@ import "./App.css";
 import Library from "./pages/library";
 import Layout from "./comp/layout/layout";
 import { Route, Routes } from "react-router-dom";
+import Login from "./pages/login";
+import { ProtectedRoute } from "./comp/auth";
 
 const getTheme = () => {
   const theme = localStorage.getItem("theme");
@@ -26,9 +28,24 @@ function App() {
   return (
     <ThemeContext.Provider value={theme}>
       <Routes>
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<Layout themeToggle={toggleTheme} />}>
-          <Route path="library" element={<Library />} />
-          <Route path="marketplace" element={<h1>Marketplace</h1>} />
+          <Route
+            path="library"
+            element={
+              <ProtectedRoute>
+                <Library />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="marketplace"
+            element={
+              <ProtectedRoute>
+                <h1>Marketplace</h1>
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </ThemeContext.Provider>
