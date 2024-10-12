@@ -1,26 +1,29 @@
 import { Card, CardMedia, CardContent, Typography } from "@mui/material";
+import { useContext } from "react";
+import { ThemeContext } from "../../App";
 
-export default function LibraryCard() {
+export default function LibraryCard({ filename, imageURL }) {
+  const theme = useContext(ThemeContext);
+  const textColor = theme === "dark" ? "text-white" : "text-black";
+
   return (
     <Card
       sx={{
+        width: "100%",
         maxWidth: 350,
         boxShadow: 0,
         backgroundColor: "transparent",
+        marginRight: "2rem",
       }}
     >
       <CardMedia
         sx={{ height: 600, borderRadius: 5 }}
-        image="https://ddz4ak4pa3d19.cloudfront.net/cache/36/cd/36cdd6fd3c54fdd8e6f175d37edff863.jpg"
-        title="movie"
+        image={imageURL}
+        title="file"
       />
-      <CardContent sx={{ color: "white" }}>
+      <CardContent className={textColor}>
         <Typography gutterBottom variant="h5" component="div">
-          Gold
-        </Typography>
-        <Typography variant="body2">
-          A technical and artistic showcase, focused on highly stylized
-          rendering and animation workflows using Geometry Node tools.
+          {filename}
         </Typography>
       </CardContent>
     </Card>

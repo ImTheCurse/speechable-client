@@ -20,21 +20,30 @@ function App() {
   function toggleTheme() {
     if (theme === "dark") {
       setTheme("light");
+      localStorage.setItem("theme", "light");
       return;
     }
     setTheme("dark");
+    localStorage.setItem("theme", "dark");
   }
   document.body.style.backgroundColor = theme === "dark" ? "" : "white";
   return (
     <ThemeContext.Provider value={theme}>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Layout themeToggle={toggleTheme} />}>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout themeToggle={toggleTheme} />
+            </ProtectedRoute>
+          }
+        >
           <Route
             path="library"
             element={
               <ProtectedRoute>
-                <Library />
+                <Library themeToggle={toggleTheme} />
               </ProtectedRoute>
             }
           />

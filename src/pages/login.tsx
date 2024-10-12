@@ -99,6 +99,15 @@ function LoginPage() {
                     borderColor: "#000",
                   },
                 },
+
+                "& input:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px white inset", // Background for autofill
+                  WebkitTextFillColor: "#000", // Autofill text color
+                  "&::selection": {
+                    backgroundColor: "#b3d4fc", // Highlight background color when selected
+                    color: "#000", // Highlighted text color when selected
+                  },
+                },
                 backgroundColor: "#fff",
               }}
             />
@@ -125,6 +134,14 @@ function LoginPage() {
                   },
                   "&.Mui-focused fieldset": {
                     borderColor: "#000",
+                  },
+                },
+                "& input:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px white inset", // Background for autofill
+                  WebkitTextFillColor: "#000", // Autofill text color
+                  "&::selection": {
+                    backgroundColor: "#b3d4fc", // Highlight background color when selected
+                    color: "#000", // Highlighted text color when selected
                   },
                 },
                 backgroundColor: "#fff",
