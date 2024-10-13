@@ -12,3 +12,15 @@ export default async function fetchFileList(): Promise<FileList> {
 
   return list;
 }
+export async function uploadFile(file: File | null) {
+  if (!file) {
+    return;
+  }
+  const formData = new FormData();
+  formData.append("upload", file);
+  await fetch("http://localhost:3000/api/upload", {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+}

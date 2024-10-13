@@ -13,13 +13,14 @@ export default function LibraryCard({ filename, imageURL }) {
         maxWidth: 350,
         boxShadow: 0,
         backgroundColor: "transparent",
-        marginRight: "2rem",
+        marginRight: "3rem",
       }}
     >
       <CardMedia
         sx={{ height: 600, borderRadius: 5 }}
         image={imageURL}
         title="file"
+        className="cursor-pointer"
       />
       <CardContent className={textColor}>
         <Typography gutterBottom variant="h5" component="div">
