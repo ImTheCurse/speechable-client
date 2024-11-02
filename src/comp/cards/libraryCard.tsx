@@ -1,8 +1,9 @@
 import { Card, CardMedia, CardContent, Typography } from "@mui/material";
 import { useContext } from "react";
 import { ThemeContext } from "../../App";
+import { downloadFilePartialContent } from "../../util/bucket";
 
-export default function LibraryCard({ filename, imageURL }) {
+export default function LibraryCard({ filename, imageURL, viewPDF }) {
   const theme = useContext(ThemeContext);
   const textColor = theme === "dark" ? "text-white" : "text-black";
 
@@ -21,6 +22,7 @@ export default function LibraryCard({ filename, imageURL }) {
         image={imageURL}
         title="file"
         className="cursor-pointer"
+        onClick={viewPDF}
       />
       <CardContent className={textColor}>
         <Typography gutterBottom variant="h5" component="div">

@@ -16,9 +16,11 @@
     "@mui/icons-material": "^6.1.2",
     "@mui/material": "^6.1.2",
     "@toolpad/core": "^0.7.0",
+    "html-react-parser": "^5.1.18",
     "mui-file-input": "^6.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-pdf": "^9.1.1",
     "react-router-dom": "^6.26.2",
     "use-file-picker": "^2.1.2"
   },
