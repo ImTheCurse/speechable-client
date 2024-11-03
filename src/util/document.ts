@@ -21,6 +21,27 @@ export async function getUserFileProgress(filename: string): Promise<Progress> {
   return progress;
 }
 
+export async function ProgressToPage(
+  filename: string,
+  num: number,
+  setChildren: CallableFunction,
+) {
+  const data = await fetch(`${server}/api/progress`, {
+    method: "POST",
+    credentials: "include",
+    body: JSON.stringify({ file: filename, page_number: String(num) }),
+    headers: {
+      "Content-Type": "aplication/json",
+    },
+  });
+  const html = await data.text();
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const body = doc.getElementsByTagName("body")[0];
+  setChildren(body.innerHTML.toString());
+}
+
 export async function fetchFileAsHTML(
   filename: string,
   progress: string,

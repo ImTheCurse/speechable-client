@@ -11,7 +11,11 @@ import {
   DialogContent,
   IconButton,
 } from "@mui/material";
-import { fetchFileAsHTML, getUserFileProgress } from "../util/document";
+import {
+  fetchFileAsHTML,
+  getUserFileProgress,
+  ProgressToPage,
+} from "../util/document";
 import DescriptionIcon from "@mui/icons-material/Description";
 import CloseIcon from "@mui/icons-material/Close";
 import { ArrowBackOutlined, ArrowForwardOutlined } from "@mui/icons-material";
@@ -48,6 +52,12 @@ export default function Library(props) {
           const parser = new DOMParser();
           const doc = parser.parseFromString(res, "text/html");
           const body = doc.getElementsByTagName("body")[0];
+          const paragraphs = body.getElementsByTagName("p");
+
+          for (const p of paragraphs) {
+            //TODO: be able to change with theme.
+            //p.style.setProperty("background-color", "white");
+          }
 
           setChildren(body.innerHTML.toString());
         }
@@ -138,11 +148,21 @@ export default function Library(props) {
 
         <DialogActions>
           <div className="flex bg-black mx-auto ">
-            <IconButton color="primary">
+            <IconButton
+              color="primary"
+              onClick={() =>
+                ProgressToPage(filename, progress - 1, setChildren)
+              }
+            >
               <ArrowBackOutlined className="text-white" />
             </IconButton>
 
-            <IconButton color="primary">
+            <IconButton
+              color="primary"
+              onClick={() =>
+                ProgressToPage(filename, progress + 1, setChildren)
+              }
+            >
               <ArrowForwardOutlined className="text-white" />
             </IconButton>
           </div>
