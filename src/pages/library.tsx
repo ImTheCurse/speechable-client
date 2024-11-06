@@ -5,20 +5,8 @@ import AddIcon from "@mui/icons-material/Add";
 import { useFilePicker } from "use-file-picker";
 import { ThemeContext } from "../App";
 import PdfViewer from "../comp/pdf/pdf";
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  IconButton,
-} from "@mui/material";
-import {
-  fetchFileAsHTML,
-  getUserFileProgress,
-  ProgressToPage,
-} from "../util/document";
-import DescriptionIcon from "@mui/icons-material/Description";
-import CloseIcon from "@mui/icons-material/Close";
-import { ArrowBackOutlined, ArrowForwardOutlined } from "@mui/icons-material";
+import { fetchFileAsHTML, getUserFileProgress } from "../util/document";
+import { Viewer } from "../comp/viewer/viewer";
 
 export default function Library(props) {
   const [list, setList] = useState<FileList>({ prefix: "", user_files: [] });
@@ -27,6 +15,7 @@ export default function Library(props) {
   const [progress, setProgress] = useState(1);
   const [filename, setFilename] = useState("");
   const [children, setChildren] = useState("");
+
   const handleOpen = (name: string) => {
     setOpen(true);
     setFilename(name);
@@ -52,12 +41,6 @@ export default function Library(props) {
           const parser = new DOMParser();
           const doc = parser.parseFromString(res, "text/html");
           const body = doc.getElementsByTagName("body")[0];
-          const paragraphs = body.getElementsByTagName("p");
-
-          for (const p of paragraphs) {
-            //TODO: be able to change with theme.
-            //p.style.setProperty("background-color", "white");
-          }
 
           setChildren(body.innerHTML.toString());
         }
@@ -127,47 +110,16 @@ export default function Library(props) {
             }
           })}
       </div>
-
-      <Dialog
+      <Viewer
         open={open}
-        onClose={handleClose}
-        scroll="paper"
-        fullScreen={true}
-      >
-        <DialogActions sx={{ justifyContent: "space-between" }}>
-          <DescriptionIcon />
-          {filename}
-          <IconButton onClick={handleClose}>
-            <CloseIcon />
-          </IconButton>
-        </DialogActions>
-
-        <DialogContent dividers={true} className="flex justify-center">
-          <PdfComp />
-        </DialogContent>
-
-        <DialogActions>
-          <div className="flex bg-black mx-auto ">
-            <IconButton
-              color="primary"
-              onClick={() =>
-                ProgressToPage(filename, progress - 1, setChildren)
-              }
-            >
-              <ArrowBackOutlined className="text-white" />
-            </IconButton>
-
-            <IconButton
-              color="primary"
-              onClick={() =>
-                ProgressToPage(filename, progress + 1, setChildren)
-              }
-            >
-              <ArrowForwardOutlined className="text-white" />
-            </IconButton>
-          </div>
-        </DialogActions>
-      </Dialog>
+        filename={filename}
+        setProgress={setProgress}
+        handleClose={handleClose}
+        progress={progress}
+        setChildren={setChildren}
+        children={children}
+        PdfComp={PdfComp}
+      />
     </div>
   );
 }
