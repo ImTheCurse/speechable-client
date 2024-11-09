@@ -14,7 +14,7 @@ import { forwardRef, useEffect, useState } from "react";
 import { getUserFileProgress } from "../../util/document";
 import PdfViewer from "../pdf/pdf";
 import { ProgressToPage } from "../../util/document";
-import { fetchCurrentAudio } from "../util/audio";
+import { fetchCurrentAudio } from "../../util/audio";
 import { fetchFileAsHTML } from "../../util/document";
 
 export function Viewer({
@@ -28,6 +28,11 @@ export function Viewer({
   PdfComp,
 }) {
   const [playing, setPlaying] = useState(false);
+  const [audioElem, setAudioElem] = useState(
+    <audio>
+      <source src="" type="audio/mpeg" />
+    </audio>,
+  );
   const handlePause = () => setPlaying(!playing);
   return (
     <Dialog open={open} onClose={handleClose} scroll="paper" fullScreen={true}>
@@ -56,8 +61,21 @@ export function Viewer({
         >
           <ArrowBackOutlined className="text-black " />
         </IconButton>
-
-        <IconButton onClick={handlePause}>
+        {audioElem}
+        <IconButton
+          onClick={() => {
+            handlePause();
+            fetchCurrentAudio("hello world!").then((res) => {
+              setAudioElem(
+                <audio
+                  autoPlay
+                  controls
+                  src={`data:audio/mpeg;base64,${res}`}
+                />,
+              );
+            });
+          }}
+        >
           {playing ? (
             <PauseIcon className="text-black" />
           ) : (
