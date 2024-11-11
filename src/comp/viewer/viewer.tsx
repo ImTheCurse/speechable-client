@@ -10,12 +10,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import { ArrowBackOutlined, ArrowForwardOutlined } from "@mui/icons-material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
-import { forwardRef, useEffect, useState } from "react";
-import { getUserFileProgress } from "../../util/document";
-import PdfViewer from "../pdf/pdf";
+import { useEffect, useRef, useState } from "react";
 import { ProgressToPage } from "../../util/document";
 import { fetchCurrentAudio } from "../../util/audio";
-import { fetchFileAsHTML } from "../../util/document";
 
 export function Viewer({
   open,
@@ -27,13 +24,40 @@ export function Viewer({
   setProgress,
   PdfComp,
 }) {
+  const [initAudioStart, setInitAudioStart] = useState(true);
   const [playing, setPlaying] = useState(false);
-  const [audioElem, setAudioElem] = useState(
-    <audio>
-      <source src="" type="audio/mpeg" />
-    </audio>,
-  );
+  const [audioElem, setAudioElem] = useState(<audio />);
+  const audioRef = useRef(null);
+
   const handlePause = () => setPlaying(!playing);
+
+  useEffect(() => {
+    let ignore = false;
+
+    if (initAudioStart || audioRef.current.ended) {
+      setInitAudioStart(false);
+      fetchCurrentAudio("insane world of programming skills").then((res) => {
+        setAudioElem(
+          <audio src={`data:audio/mpeg;base64,${res}`} ref={audioRef} />,
+        );
+      });
+
+      return () => {
+        ignore = true;
+      };
+    }
+    if (playing) {
+      audioRef.current.play();
+      return () => {
+        ignore = true;
+      };
+    }
+    audioRef.current.pause();
+    return () => {
+      ignore = true;
+    };
+  }, [playing, audioElem]);
+
   return (
     <Dialog open={open} onClose={handleClose} scroll="paper" fullScreen={true}>
       <DialogActions sx={{ justifyContent: "space-between" }}>
@@ -62,20 +86,7 @@ export function Viewer({
           <ArrowBackOutlined className="text-black " />
         </IconButton>
         {audioElem}
-        <IconButton
-          onClick={() => {
-            handlePause();
-            fetchCurrentAudio("hello world!").then((res) => {
-              setAudioElem(
-                <audio
-                  autoPlay
-                  controls
-                  src={`data:audio/mpeg;base64,${res}`}
-                />,
-              );
-            });
-          }}
-        >
+        <IconButton onClick={handlePause}>
           {playing ? (
             <PauseIcon className="text-black" />
           ) : (
