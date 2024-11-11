@@ -26,13 +26,17 @@ export function Viewer({
 }) {
   const [initAudioStart, setInitAudioStart] = useState(true);
   const [playing, setPlaying] = useState(false);
-  const [audioElem, setAudioElem] = useState(<audio />);
   const audioRef = useRef(null);
+  const [audioElem, setAudioElem] = useState(<audio ref={audioRef} />);
 
   const handlePause = () => setPlaying(!playing);
 
   useEffect(() => {
     let ignore = false;
+
+    if (!audioRef.current) {
+      return () => (ignore = true);
+    }
 
     if (initAudioStart || audioRef.current.ended) {
       setInitAudioStart(false);
@@ -52,11 +56,12 @@ export function Viewer({
         ignore = true;
       };
     }
+    console.log("hello");
     audioRef.current.pause();
     return () => {
       ignore = true;
     };
-  }, [playing, audioElem]);
+  }, [playing, audioElem, initAudioStart]);
 
   return (
     <Dialog open={open} onClose={handleClose} scroll="paper" fullScreen={true}>
