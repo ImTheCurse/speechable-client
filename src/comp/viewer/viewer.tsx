@@ -13,6 +13,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import { useEffect, useRef, useState } from "react";
 import { ProgressToPage } from "../../util/document";
 import { fetchCurrentAudio } from "../../util/audio";
+import { XMLParser } from "react-xml-parser";
 
 export function Viewer({
   open,
@@ -24,44 +25,60 @@ export function Viewer({
   setProgress,
   PdfComp,
 }) {
-  const [initAudioStart, setInitAudioStart] = useState(true);
   const [playing, setPlaying] = useState(false);
+  const [audioIndex, setAudioIndex] = useState(0);
+  const [text, setText] = useState<HTMLCollection>();
+  const [audioElem, setAudioElem] = useState(<audio />);
+  const [currAudioTime, setCurrAudioTime] = useState(0); //in seconds
+
   const audioRef = useRef(null);
-  const [audioElem, setAudioElem] = useState(<audio ref={audioRef} />);
 
   const handlePause = () => setPlaying(!playing);
+  const handleEndedAudio = () => setAudioIndex((c) => c + 1);
+
+  useEffect(() => {
+    let ignore = false;
+    const parser = new DOMParser();
+    const body = parser.parseFromString(children, "text/html");
+    const p = body.getElementsByTagName("p");
+    setText(p);
+    setAudioIndex(0);
+
+    return () => {
+      ignore = true;
+    };
+  }, [children]);
 
   useEffect(() => {
     let ignore = false;
 
-    if (!audioRef.current) {
+    if (!playing) {
+      if (audioRef !== null && audioRef.current !== null) {
+        audioRef.current.pause();
+      }
       return () => (ignore = true);
     }
 
-    if (initAudioStart || audioRef.current.ended) {
-      setInitAudioStart(false);
-      fetchCurrentAudio("insane world of programming skills").then((res) => {
-        setAudioElem(
-          <audio src={`data:audio/mpeg;base64,${res}`} ref={audioRef} />,
+    if (text?.length > 0) {
+      fetchCurrentAudio(
+        text[audioIndex] === null ? "" : text[audioIndex].textContent,
+      ).then((res) => {
+        const elem = (
+          <audio
+            src={`data:audio/mpeg;base64,${res}`}
+            onEnded={handleEndedAudio}
+            ref={audioRef}
+            autoPlay
+          />
         );
+        setAudioElem(elem);
       });
+    }
 
-      return () => {
-        ignore = true;
-      };
-    }
-    if (playing) {
-      audioRef.current.play();
-      return () => {
-        ignore = true;
-      };
-    }
-    console.log("hello");
-    audioRef.current.pause();
     return () => {
       ignore = true;
     };
-  }, [playing, audioElem, initAudioStart]);
+  }, [playing, text, audioIndex]);
 
   return (
     <Dialog open={open} onClose={handleClose} scroll="paper" fullScreen={true}>
