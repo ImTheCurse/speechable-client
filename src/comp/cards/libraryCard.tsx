@@ -1,8 +1,15 @@
-import { Card, CardMedia, CardContent, Typography } from "@mui/material";
+import {
+  Card,
+  CardMedia,
+  CardContent,
+  Typography,
+  Skeleton,
+} from "@mui/material";
 import { useContext } from "react";
 import { ThemeContext } from "../../App";
+import { downloadFilePartialContent } from "../../util/bucket";
 
-export default function LibraryCard({ filename, imageURL }) {
+export default function LibraryCard({ filename, imageURL, viewPDF }) {
   const theme = useContext(ThemeContext);
   const textColor = theme === "dark" ? "text-white" : "text-black";
 
@@ -13,14 +20,21 @@ export default function LibraryCard({ filename, imageURL }) {
         maxWidth: 350,
         boxShadow: 0,
         backgroundColor: "transparent",
-        marginRight: "2rem",
+        marginRight: "3rem",
       }}
     >
-      <CardMedia
-        sx={{ height: 600, borderRadius: 5 }}
-        image={imageURL}
-        title="file"
-      />
+      {imageURL ? (
+        <CardMedia
+          sx={{ height: 600, borderRadius: 5 }}
+          image={imageURL}
+          title="file"
+          className="cursor-pointer"
+          onClick={viewPDF}
+        />
+      ) : (
+        <Skeleton variant="rectangular" width={350} height={600} />
+      )}
+
       <CardContent className={textColor}>
         <Typography gutterBottom variant="h5" component="div">
           {filename}

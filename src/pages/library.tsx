@@ -1,37 +1,91 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useContext, useEffect, useState } from "react";
 import LibraryCard from "../comp/cards/libraryCard";
-import fetchFileList, { FileList } from "../util/bucket";
-import { Button } from "@mui/material";
+import fetchFileList, { FileList, uploadFile } from "../util/bucket";
 import AddIcon from "@mui/icons-material/Add";
+import { useFilePicker } from "use-file-picker";
+import { ThemeContext } from "../App";
+import PdfViewer from "../comp/pdf/pdf";
+import { fetchFileAsHTML, getUserFileProgress } from "../util/document";
+import { Viewer } from "../comp/viewer/viewer";
 
 export default function Library(props) {
   const [list, setList] = useState<FileList>({ prefix: "", user_files: [] });
+  const [file, setFile] = useState<File | null>();
+  const [open, setOpen] = useState(false);
+  const [progress, setProgress] = useState(1);
+  const [filename, setFilename] = useState("");
+  const [children, setChildren] = useState("");
+
+  const handleOpen = (name: string) => {
+    setOpen(true);
+    setFilename(name);
+  };
+  const handleClose = () => setOpen(false);
+  const theme = useContext(ThemeContext);
+
+  const PdfComp = forwardRef<HTMLDivElement>((props, ref) => {
+    useEffect(() => {
+      let ignore = false;
+      getUserFileProgress(filename).then((res) => {
+        if (!ignore) {
+          if (res.current_page == 0) {
+            setProgress(1);
+            return;
+          }
+          setProgress(res.current_page);
+        }
+      });
+      fetchFileAsHTML(filename, String(progress)).then((res) => {
+        if (!ignore) {
+          //convert text to html
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(res, "text/html");
+          const body = doc.getElementsByTagName("body")[0];
+
+          setChildren(body.innerHTML.toString());
+        }
+      });
+
+      return () => {
+        ignore = true;
+      };
+    }, []);
+    return (
+      <div ref={ref} {...props} className="">
+        {<PdfViewer content={children} />}
+      </div>
+    );
+  });
+
+  const { openFilePicker } = useFilePicker({
+    accept: ".pdf, .txt, .doc, .docx",
+    onFilesSelected: ({ plainFiles }) => {
+      uploadFile(plainFiles[0]).then(() => setFile(plainFiles[0]));
+    },
+  });
+
   useEffect(() => {
     let ignore = false;
     fetchFileList().then((res) => {
       if (!ignore) {
         setList(res);
-        console.log(res);
       }
     });
+
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [file]);
 
   return (
     <div className="flex flex-col">
-      <Button
-        variant="outlined"
-        startIcon={<AddIcon />}
-        sx={{
-          marginBottom: "20px",
-          width: "8rem",
-          marginLeft: "2rem",
-        }}
+      <button
+        onClick={() => openFilePicker()}
+        className={`w-28 ml-8 mb-8 outline ${theme === "dark" ? "bg-black text-white " : "bg-white text-black"}`}
       >
-        Add File
-      </Button>
+        <AddIcon />
+        New
+      </button>
       <div className="flex flex-row flex-wrap ml-8">
         {list.user_files &&
           list.user_files.map((value, index, files) => {
@@ -44,11 +98,28 @@ export default function Library(props) {
                 imageURL = `https://speechable.fra1.cdn.digitaloceanspaces.com/@${list.prefix}/${image}.jpeg`;
               }
               return (
-                <LibraryCard filename={value} imageURL={imageURL} key={index} />
+                <LibraryCard
+                  filename={value}
+                  imageURL={imageURL}
+                  key={index}
+                  viewPDF={() => {
+                    handleOpen(value);
+                  }}
+                />
               );
             }
           })}
       </div>
+      <Viewer
+        open={open}
+        filename={filename}
+        setProgress={setProgress}
+        handleClose={handleClose}
+        progress={progress}
+        setChildren={setChildren}
+        children={children}
+        PdfComp={PdfComp}
+      />
     </div>
   );
 }

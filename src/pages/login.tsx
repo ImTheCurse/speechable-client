@@ -9,6 +9,8 @@ import {
   Link,
 } from "@mui/material";
 
+const server = "http://localhost:3000";
+
 function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +20,7 @@ function LoginPage() {
     e.preventDefault();
     // Implement login logic here
     function login() {
-      const data = fetch("http://localhost:3000/auth/login", {
+      const data = fetch(`${server}/auth/login`, {
         method: "POST",
         credentials: "include",
         headers: {
