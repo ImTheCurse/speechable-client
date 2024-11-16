@@ -10,7 +10,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { ArrowBackOutlined, ArrowForwardOutlined } from "@mui/icons-material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
-import { useEffect, useRef, useState } from "react";
+import { LegacyRef, useCallback, useEffect, useRef, useState } from "react";
 import { ProgressToPage } from "../../util/document";
 import { fetchCurrentAudio } from "../../util/audio";
 import { XMLParser } from "react-xml-parser";
@@ -29,12 +29,15 @@ export function Viewer({
   const [audioIndex, setAudioIndex] = useState(0);
   const [text, setText] = useState<HTMLCollection>();
   const [audioElem, setAudioElem] = useState(<audio />);
-  const [currAudioTime, setCurrAudioTime] = useState(0); //in seconds
+  const [changedSentence, setChangedSentence] = useState(true);
 
   const audioRef = useRef(null);
 
   const handlePause = () => setPlaying(!playing);
-  const handleEndedAudio = () => setAudioIndex((c) => c + 1);
+  const handleEndedAudio = () => {
+    setAudioIndex((c) => c + 1);
+    setChangedSentence(true);
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -49,17 +52,23 @@ export function Viewer({
     };
   }, [children]);
 
+  // TODO:
+  // There is a problem with useRef + useEffect since useEffect dosent rerender every time meaning that the ref isnt set until next render
+  // https://stackoverflow.com/questions/60476155/is-it-safe-to-use-ref-current-as-useeffects-dependency-when-ref-points-to-a-dom/67906087#67906087
+  // https://legacy.reactjs.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node
   useEffect(() => {
     let ignore = false;
 
     if (!playing) {
-      if (audioRef !== null && audioRef.current !== null) {
+      if (audioRef && audioRef.current) {
         audioRef.current.pause();
+        setChangedSentence(false);
       }
-      return () => (ignore = true);
-    }
-
-    if (text?.length > 0) {
+    } else if (
+      text?.length > 0 &&
+      text?.length > audioIndex &&
+      changedSentence
+    ) {
       fetchCurrentAudio(
         text[audioIndex] === null ? "" : text[audioIndex].textContent,
       ).then((res) => {
@@ -74,11 +83,14 @@ export function Viewer({
         setAudioElem(elem);
       });
     }
-
+    if (playing && audioRef && audioRef.current && !changedSentence) {
+      audioRef.current.play();
+    }
     return () => {
       ignore = true;
+      setChangedSentence(true);
     };
-  }, [playing, text, audioIndex]);
+  }, [playing, text, audioIndex, audioRef, changedSentence]);
 
   return (
     <Dialog open={open} onClose={handleClose} scroll="paper" fullScreen={true}>
